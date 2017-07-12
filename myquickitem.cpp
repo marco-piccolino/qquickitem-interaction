@@ -1,13 +1,15 @@
 #include "myquickitem.h"
+#include "mypainteditem.h"
 
-MyQuickItem::MyQuickItem()
+MyQuickItem::MyQuickItem(QQuickItem *parent)
+    : QQuickItem(parent)
 {
-    setFlag(QQuickItem::ItemHasContents, false);
-    setFlag(QQuickItem::ItemClipsChildrenToShape, true);
     createCanvases();
 }
 
 void MyQuickItem::createCanvases()
 {
-
+    for (int i = 0; i < 3; ++i) {
+        m_canvases[i] = new MyPaintedItem(this);
+    }
 }

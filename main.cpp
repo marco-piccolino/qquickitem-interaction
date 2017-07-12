@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
+    qmlRegisterType<MyPaintedItem>("myquickitem",1,0,"MyPaintedItem");
     qmlRegisterType<MyQuickItem>("myquickitem",1,0,"MyQuickItem");
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

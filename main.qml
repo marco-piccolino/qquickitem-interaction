@@ -8,5 +8,11 @@ Window {
     height: 480
     title: qsTr("Hello World")
 
-    MyQuickItem {}
+    Item {
+        anchors.fill: parent
+        MyPaintedItem {
+            width: parent.width
+            height: parent.height
+        }
+    }
 }

@@ -3,13 +3,16 @@
 
 #include <QQuickItem>
 
+#include "mypainteditem.h"
+
 class MyQuickItem : public QQuickItem
 {
     Q_OBJECT
 public:
-    MyQuickItem();
+    MyQuickItem(QQuickItem* parent = nullptr);
+    Q_INVOKABLE void createCanvases();
 private:
-    void createCanvases();
+    MyPaintedItem* m_canvases[3];
 };
 
 #endif // MYQUICKITEM_H
