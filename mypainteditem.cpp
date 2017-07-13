@@ -3,10 +3,10 @@
 MyPaintedItem::MyPaintedItem(QQuickItem *parent)
     :QQuickPaintedItem(parent)
 {
-    setFillColor(QColor("#eee"));
+    setFillColor(QColor(qrand() % 255,qrand() % 255,qrand() % 255));
 }
 
 void MyPaintedItem::paint(QPainter *painter)
 {
-    qDebug() << "paint";
+
 }

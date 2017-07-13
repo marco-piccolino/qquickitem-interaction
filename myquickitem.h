@@ -11,6 +11,8 @@ class MyQuickItem : public QQuickItem
 public:
     MyQuickItem(QQuickItem* parent = nullptr);
     Q_INVOKABLE void createCanvases();
+public slots:
+    void onSizeChanged();
 private:
     MyPaintedItem* m_canvases[3];
 };
