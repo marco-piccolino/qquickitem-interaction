@@ -9,53 +9,46 @@ Window {
     height: 480
     title: qsTr("Hello World")
 
-//    Flickable {
-//        id: flickArea
-//        anchors.fill: parent
-//        contentHeight: item.height
-//        contentWidth: item.width
-//        flickableDirection: Flickable.HorizontalFlick
-        MyQuickItem {
-            id: item
-            width: window.width
-            height: window.height
+    MyQuickItem {
+        id: item
+        width: window.width
+        height: window.height
 
-            MultiPointTouchArea {
-                id: mptAreaDouble
-                objectName: "mtpAreaDouble"
-                signal pinched()
-                signal twoFingered()
+        MultiPointTouchArea {
+            id: mptAreaDouble
+            objectName: "mtpAreaDouble"
+            signal pinched()
+            signal twoFingered()
+            anchors.fill: parent
+            touchPoints: [
+                TouchPoint {id: point1},
+                TouchPoint {id: point2}
+            ]
+            minimumTouchPoints: 2
+            maximumTouchPoints: 2
+            onPressed: mptAreaSingle.enabled = false
+            onReleased: {
+                if (point1.previousX !== point1.x
+                        && point2.previousX !== point2.x) {
+                    pinched()
+                } else {
+                    twoFingered()
+                }
+                stimer.restart()
+            }
+            MouseArea {
+                id: mptAreaSingle
+                objectName: "mtpAreaSingle"
                 anchors.fill: parent
-                touchPoints: [
-                    TouchPoint {id: point1},
-                    TouchPoint {id: point2}
-                ]
-                minimumTouchPoints: 2
-                maximumTouchPoints: 2
-                onPressed: mptAreaSingle.enabled = false
-                onReleased: {
-                    if (point1.previousX !== point1.x
-                    && point2.previousX !== point2.x) {
-                        pinched()
-                    } else {
-                        twoFingered()
-                    }
-                    stimer.restart()
-                }
-                MouseArea {
-                    id: mptAreaSingle
-                    objectName: "mtpAreaSingle"
-                    anchors.fill: parent
-                    scrollGestureEnabled: false
-                }
-                Timer {
-                    id: stimer
-                    interval: 1200
-                    onTriggered: mptAreaSingle.enabled = true
-                }
+                scrollGestureEnabled: false
+            }
+            Timer {
+                id: stimer
+                interval: 1200
+                onTriggered: mptAreaSingle.enabled = true
             }
         }
-//    }
+    }
 
     Text {
         id: textBox
@@ -71,10 +64,6 @@ Window {
             onTwoFingered: {textBox.text = "two finger touch";timer.start()}
             onPinched: {textBox.text = "pinch";timer.start()}
         }
-//        Connections {
-//            target: flickArea
-//            onFlickStarted: {textBox.text = "swipe";timer.start()}
-//        }
         Timer {
             id: timer
             interval: 1000
