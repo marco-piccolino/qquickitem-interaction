@@ -13,87 +13,115 @@ Window {
         id: item
         width: window.width
         height: window.height
+        MultiPointTouchArea {
+            id: mptArea
 
-        PinchArea {
-            id: pinchArea
+            signal twoFingersPressed()
             anchors.fill: parent
-        }
-        MouseArea {
-            id: mouseSwipeArea
-            objectName: "mouseSwipeArea"
-            anchors.fill: parent
-            scrollGestureEnabled: false
+            mouseEnabled: false
+            minimumTouchPoints: 2
+            maximumTouchPoints: 2
+            touchPoints: [
+                TouchPoint {
+                    id: tp1
+                },
+                TouchPoint {
+                    id: tp2
+                }
+            ]
+            onPressed: mptTimer.start()
 
-            property real prevX: 0
-            property real prevY: 0
-            property real velocityX: 0.0
-            property real velocityY: 0.0
-            property int startX: 0
-            property int startY: 0
-            property bool tracing: false
-
-            signal swipeLeft()
-            signal swipeRight()
-            signal swipeUp()
-            signal swipeDown()
-
-            onPressed: {
-                startX = mouse.x
-                startY = mouse.y
-                prevX = mouse.x
-                prevY = mouse.y
-                velocityX = 0
-                velocityY = 0
-                tracing = true
+            Timer {
+                id: mptTimer
+                interval: 100
+                onTriggered: if (!pinchArea.pinching) mptArea.twoFingersPressed()
             }
 
-            onPositionChanged: {
-                if ( !tracing ) return
-                var currVelX = (mouse.x-prevX)
-                var currVelY = (mouse.y-prevY)
+            PinchArea {
+                id: pinchArea
 
-                velocityX = (velocityX + currVelX)/2.0;
-                velocityY = (velocityY + currVelY)/2.0;
+                property bool pinching
+                anchors.fill: parent
 
-                prevX = mouse.x
-                prevY = mouse.y
+                onPinchStarted: pinching = true
+                onPinchFinished: pinching = false
 
-                if ( velocityX > 15 && mouse.x > mouseSwipeArea.width * 0.25 ) {
-                    tracing = false
-                    // Swipe Right
-                    mouseSwipeArea.swipeRight()
-                } else if ( velocityX < -15 && mouse.x < mouseSwipeArea.width * 0.75 ) {
-                    tracing = false
-                    // Swipe Left
-                    mouseSwipeArea.swipeLeft()
-                } else if (velocityY > 15 && mouse.y > mouseSwipeArea.height * 0.25 ) {
-                    tracing = false
-                    // Swipe Down
-                    mouseSwipeArea.swipeDown()
-                } else if ( velocityY < -15 && mouse.y < mouseSwipeArea.height * 0.75 ) {
-                    tracing = false
-                    // Swipe Up
-                    mouseSwipeArea.swipeUp()
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                }
+
+                MouseArea {
+                    id: swipeArea
+                    anchors.fill: parent
+                    property real prevX: 0
+                    property real velocityX: 0.0
+                    property int startX: 0
+                    property bool tracing: false
+                    property bool swipedLeft: false
+                    property bool swipedRight: false
+
+                    signal swipeLeft()
+                    signal swipeRight()
+
+                    propagateComposedEvents: true
+
+                    onPressed: {
+                        startX = mouse.x
+                        prevX = mouse.x
+                        velocityX = 0
+                        tracing = true
+                    }
+                    onClicked: {
+                        mouse.accepted = swipedLeft || swipedRight
+                        swipedLeft = swipedRight = false
+                    }
+
+                    onPositionChanged: {
+                        if ( !tracing ) return
+                        var currVelX = (mouse.x-prevX)
+
+                        velocityX = (velocityX + currVelX)/2.0;
+
+                        prevX = mouse.x
+
+                        if ( velocityX > 10 && mouse.x > width * 0.25 ) {
+                            tracing = false
+                            swipeRight()
+                            swipedRight = true
+                        } else if ( velocityX < -10 && mouse.x < width * 0.75 ) {
+                            tracing = false
+                            swipeLeft()
+                            swipedLeft = true
+                        }
+                    }
                 }
             }
         }
     }
-
     Text {
         id: textBox
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         Connections {
-            target: mouseSwipeArea
+            target: mouseArea
             onClicked: {textBox.text = "touch";timer.start()}
             onPressAndHold: {textBox.text = "long touch";timer.start()}
+        }
+        Connections {
+            target: swipeArea
             onSwipeLeft: {textBox.text = "swipe left";timer.start()}
             onSwipeRight: {textBox.text = "swipe right";timer.start()}
         }
         Connections {
             target: pinchArea
-            onPinchFinished: {textBox.text = "pinch";timer.start()}
+            onPinchStarted: {textBox.text = "pinch";timer.start()}
         }
+        Connections {
+            target: mptArea
+            onTwoFingersPressed: {textBox.text = "two-finger touch";timer.start()}
+        }
+
         Timer {
             id: timer
             interval: 1000
