@@ -14,38 +14,67 @@ Window {
         width: window.width
         height: window.height
 
-        MultiPointTouchArea {
-            id: mptAreaDouble
-            objectName: "mtpAreaDouble"
-            signal pinched()
-            signal twoFingered()
+        PinchArea {
+            id: pinchArea
             anchors.fill: parent
-            touchPoints: [
-                TouchPoint {id: point1},
-                TouchPoint {id: point2}
-            ]
-            minimumTouchPoints: 2
-            maximumTouchPoints: 2
-            onPressed: mptAreaSingle.enabled = false
-            onReleased: {
-                if (point1.previousX !== point1.x
-                        && point2.previousX !== point2.x) {
-                    pinched()
-                } else {
-                    twoFingered()
+        }
+        MouseArea {
+            id: mouseSwipeArea
+            objectName: "mouseSwipeArea"
+            anchors.fill: parent
+            scrollGestureEnabled: false
+
+            property real prevX: 0
+            property real prevY: 0
+            property real velocityX: 0.0
+            property real velocityY: 0.0
+            property int startX: 0
+            property int startY: 0
+            property bool tracing: false
+
+            signal swipeLeft()
+            signal swipeRight()
+            signal swipeUp()
+            signal swipeDown()
+
+            onPressed: {
+                startX = mouse.x
+                startY = mouse.y
+                prevX = mouse.x
+                prevY = mouse.y
+                velocityX = 0
+                velocityY = 0
+                tracing = true
+            }
+
+            onPositionChanged: {
+                if ( !tracing ) return
+                var currVelX = (mouse.x-prevX)
+                var currVelY = (mouse.y-prevY)
+
+                velocityX = (velocityX + currVelX)/2.0;
+                velocityY = (velocityY + currVelY)/2.0;
+
+                prevX = mouse.x
+                prevY = mouse.y
+
+                if ( velocityX > 15 && mouse.x > mouseSwipeArea.width * 0.25 ) {
+                    tracing = false
+                    // Swipe Right
+                    mouseSwipeArea.swipeRight()
+                } else if ( velocityX < -15 && mouse.x < mouseSwipeArea.width * 0.75 ) {
+                    tracing = false
+                    // Swipe Left
+                    mouseSwipeArea.swipeLeft()
+                } else if (velocityY > 15 && mouse.y > mouseSwipeArea.height * 0.25 ) {
+                    tracing = false
+                    // Swipe Down
+                    mouseSwipeArea.swipeDown()
+                } else if ( velocityY < -15 && mouse.y < mouseSwipeArea.height * 0.75 ) {
+                    tracing = false
+                    // Swipe Up
+                    mouseSwipeArea.swipeUp()
                 }
-                stimer.restart()
-            }
-            MouseArea {
-                id: mptAreaSingle
-                objectName: "mtpAreaSingle"
-                anchors.fill: parent
-                scrollGestureEnabled: false
-            }
-            Timer {
-                id: stimer
-                interval: 1200
-                onTriggered: mptAreaSingle.enabled = true
             }
         }
     }
@@ -55,14 +84,15 @@ Window {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         Connections {
-            target: mptAreaSingle
+            target: mouseSwipeArea
             onClicked: {textBox.text = "touch";timer.start()}
             onPressAndHold: {textBox.text = "long touch";timer.start()}
+            onSwipeLeft: {textBox.text = "swipe left";timer.start()}
+            onSwipeRight: {textBox.text = "swipe right";timer.start()}
         }
         Connections {
-            target: mptAreaDouble
-            onTwoFingered: {textBox.text = "two finger touch";timer.start()}
-            onPinched: {textBox.text = "pinch";timer.start()}
+            target: pinchArea
+            onPinchFinished: {textBox.text = "pinch";timer.start()}
         }
         Timer {
             id: timer
