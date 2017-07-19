@@ -105,21 +105,21 @@ Window {
         anchors.horizontalCenter: parent.horizontalCenter
         Connections {
             target: mouseArea
-            onClicked: {textBox.text = "touch";timer.start()}
-            onPressAndHold: {textBox.text = "long touch";timer.start()}
+            onClicked: {print("touch");textBox.text = "touch";timer.start()}
+            onPressAndHold: {print("long touch");textBox.text = "long touch";timer.start()}
         }
         Connections {
             target: swipeArea
-            onSwipeLeft: {textBox.text = "swipe left";timer.start()}
-            onSwipeRight: {textBox.text = "swipe right";timer.start()}
+            onSwipeLeft: {print("swipe left");textBox.text = "swipe left";timer.start()}
+            onSwipeRight: {print("swipe right");textBox.text = "swipe right";timer.start()}
         }
         Connections {
             target: pinchArea
-            onPinchStarted: {textBox.text = "pinch";timer.start()}
+            onPinchStarted: {print("pinch");textBox.text = "pinch";timer.start()}
         }
         Connections {
             target: mptArea
-            onTwoFingersPressed: {textBox.text = "two-finger touch";timer.start()}
+            onTwoFingersPressed: {print("two-finger touch");textBox.text = "two-finger touch";timer.start()}
         }
 
         Timer {
